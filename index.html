@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="shortcut icon" href="/static/favicon.ico" />
+  <title>Scan Intelligent</title>
+  <script type="text/javascript">
+    window.onerror = function (msg, url, line, col, error) {
+      // Note that col & error are new to the HTML 5 spec and may not be supported in every browser
+      var extra = !col ? '' : '\ncolumn: ' + col;
+      extra += !error ? '' : '\nerror: ' + error;
+
+      var message = "Erreur inattendue : " + msg + ", url: " + url + ", line: " + line + extra;
+      alert(message);
+
+      // Report this error via ajax (used for dev env)
+      //var xhr = new XMLHttpRequest();
+      //xhr.open("POST", '<%= process.env.BACKEND_ADDR %><%= process.env.LOG_RESOURCE %>', true);
+      //xhr.setRequestHeader("Content-type", "application/json");
+      //xhr.send('{"comment": "' + message + '"}');
+
+      // If you return true, then error alerts (like in older versions of Internet Explorer) will be suppressed.
+      var suppressErrorAlert = true;
+      return suppressErrorAlert;
+    };
+  </script>
+</head>
+
+<body>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+</html>

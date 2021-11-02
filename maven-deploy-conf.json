@@ -1,0 +1,13 @@
+{
+  "groupId":  "fr.pe.stra.progiciel.px014",
+  "artifactId":  "px014-scanr-front-vuejs",
+  "repositories": [
+    {
+      "id": "defaut",
+      "url": "http://artefact-repo.pole-emploi.intra/artifactory/Alpha/"
+    }
+  ]
+}
+
+
+

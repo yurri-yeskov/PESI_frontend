@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<displayText xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.xerox.com/office/cui/displaytext/1">
+	<label>Accès Conseillers Pôle Emploi %%appli.env%%</label>
+	<description>Accès Conseillers Pôle Emploi %%appli.env%%</description>	
+</displayText>

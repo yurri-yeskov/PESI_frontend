@@ -1,0 +1,151 @@
+#!/usr/bin/groovy
+import fr.pe.jenkins.plugins.bundle.Bundle
+import fr.pe.jenkins.plugins.bundle.BundleFactory
+import fr.pe.jenkins.plugins.notification.*
+import fr.pe.jenkins.plugins.notification.html.*
+import fr.pe.jenkins.plugins.notification.library.*
+import fr.pe.jenkins.plugins.util.*
+
+@Library(['utility-dsl@v2.3', 'pipeline-shared-lib@2.28']) _
+
+Bundle releaseBundle
+def configuration = [:]
+
+String pipelineDeLivraison_master = "PX014-ScanR/px014-scanr-front-vuejs-livraison-master"
+String pipelineDeLivraison_versalink = "PX014-ScanR/px014-scanr-front-vuejs-livraison-versalink"
+String pipelineDeLivraison_correctif_prod = "PX014-ScanR/px014-scanr-front-vuejs-livraison-correctif-prod"
+//String versionInput
+
+pipeline {
+
+    agent none
+
+    options {
+        timeout(time: 1, unit: 'HOURS')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        ansiColor('xterm')
+    }
+
+    tools {
+        maven "MAVEN_3_5_0_HOME"
+        jdk "JAVA_1_8_0_66_HOME"
+	    nodejs "NODEJS_8_12_0_HOME"
+    }
+
+    environment {
+        JAVA_VERSION_HOME = 'JAVA_1_8_0_66_HOME'
+        MAVEN_VERSION_HOME = 'MAVEN_3_5_0_HOME'
+        GROOVY_VERSION_HOME = 'GROOVY_2_4_3_HOME'
+        PROVEN_CREDENTIAL_ID = "proven_user"
+        provenUser = "${env['PROVEN_user']}"
+        provenPassword = "${env['PROVEN_password']}"
+    }
+
+    stages {
+
+        stage('Prepare') {
+            agent {
+                label 'nodejs'
+            }
+            steps {
+                sh 'git clean -xf'
+                checkout scm
+            }
+        }
+
+        stage('Initialisations') {
+            agent {
+                label 'nodejs'
+            }
+            steps {
+                script {
+                    //echo "\n=== Release de la version ==="
+                    //sh "npm version ${versionInput} --no-git-tag-version"
+                
+                    //creation de l'object Bundle Ã  partir du pom
+                    def jsonElem = json.parseFromText(readFile('./package.json'))
+                    def groupId = jsonElem['groupId']
+                    def artifactId = jsonElem['artifactId']
+                    def version = jsonElem['version']
+                    releaseBundle = BundleFactory.createStandardReleaseBundle(groupId, artifactId, version, null, 'zip')
+                    releaseBundle.unzipArtifact=true
+          
+                    //affichage du numero de version dans le numero de build
+                    currentBuild.displayName = '#' + currentBuild.number + ' version | ' + releaseBundle.releaseVersion
+          
+                    echo "\n=== Installation des dépendances ==="
+                    sh "npm install"
+                }
+            }
+        }
+
+        stage('Construction de la release') {
+            agent {
+                label 'nodejs'
+            }
+            steps {
+                echo "\n============== Build Release ========================="
+
+                echo "\n=== Release de la version ==="
+                sh "npm version ${releaseBundle.releaseVersion} --no-git-tag-version"
+
+                echo "\n=== Construction du livrable ==="
+                sh "npm run build"
+                echo "\n=== Déploiement du livrable ==="
+                sh "npm run deploy"
+
+                echo "\n=== Push du tag ==="
+                sh "git commit -am \"[Jenkins] Release de la version ${releaseBundle.releaseVersion}\" && git tag -a ${releaseBundle.releaseVersion} -m \"version " +
+                  "${releaseBundle.releaseVersion}\" && git push --tags && git reset HEAD --hard"
+
+                script {
+                    // Création du bundle dans Proven
+                    creerBundleProven {
+                        bundles = [releaseBundle]
+                        artifactoryServer = 'artifactory-pe'
+                    }
+                }
+
+                echo "\n=== Passage à la version de dev suivante ==="
+                sh "npm version ${releaseBundle.nextDevelopmentVersion} --no-git-tag-version"
+
+                sh "git commit -am \"[Jenkins] passage a la prochaine version ${releaseBundle.nextDevelopmentVersion}\" && git push"
+            }
+        }
+
+        stage ('Déclenchement du pipeline de livraison') {
+            agent none
+            
+            steps {
+                script {
+                    if ("${BRANCH_NAME}" == "master") {
+                        println "Déclenchement du pipeline de livraison : $pipelineDeLivraison_master pour la branche ${BRANCH_NAME}"
+                        
+                        build job: "$pipelineDeLivraison_master", propagate : false ,  wait: false , parameters: [
+                            [$class: 'StringParameterValue', name: 'version', value: releaseBundle.releaseVersion],
+                            [$class: 'StringParameterValue', name: 'RepriseStage', value: 'TIC']
+                        ]
+                    } else {
+                        if ("${BRANCH_NAME}" == "versalink") {
+                            println "Déclenchement du pipeline de livraison : $pipelineDeLivraison_versalink pour la branche ${BRANCH_NAME}"
+                        
+                            build job: "$pipelineDeLivraison_versalink", propagate : false ,  wait: false , parameters: [
+                                [$class: 'StringParameterValue', name: 'version', value: releaseBundle.releaseVersion],
+                                [$class: 'StringParameterValue', name: 'RepriseStage', value: 'TIC']
+                            ]
+                        } else {
+                        
+                            println "Déclenchement du pipeline de livraison : $pipelineDeLivraison_correctif_prod pour la branche ${BRANCH_NAME}"
+                        
+                            build job: "$pipelineDeLivraison_correctif_prod", propagate : false ,  wait: false , parameters: [
+                                [$class: 'StringParameterValue', name: 'version', value: releaseBundle.releaseVersion],
+                                [$class: 'StringParameterValue', name: 'RepriseStage', value: 'VA-CPP']
+                            ]
+                        }
+                    }
+                }
+            }
+       }
+    }
+}

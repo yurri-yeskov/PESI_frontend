@@ -1,0 +1,35 @@
+// Bootstrap configuration
+$icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
+$font-size-base: 21px;
+
+// Navbar
+$navbar-default-bg: #ffffff;
+
+// Buttons
+$brand-primary: #FF483E !default;
+$brand-success: #FF483E !default;
+$brand-info: #FF483E !default;
+$brand-warning: #FF483E !default;
+$brand-danger: #FF483E !default;
+
+// Hack min-width
+$screen-sm: 740px !default;
+
+// Fonts
+$headings-color: #373F4A;
+$navbar-default-color: $headings-color;
+
+// Font awesome
+$fa-font-path: "~font-awesome/fonts";
+
+// Utils
+$btn-margin: 30px;
+$btn-height: 80px;
+$btn-width-large: 250px;
+$btn-list-height: 70px;
+$btn-list-width: 485px;
+$btn-list-width-search: $btn-list-width * 0.95;
+
+$padding-outer: 10px;
+$margin-outer: 10px;
+$global-background: #E7EBEE !default;

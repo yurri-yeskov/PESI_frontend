@@ -1,0 +1,100 @@
+@import "definitions.scss";
+@import "~bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+@import "~font-awesome/scss/font-awesome";
+
+html {
+  height: 100vh;
+}
+
+body {
+  height: 100vh;
+  background: $global-background;
+  min-height: 480px;
+}
+
+#content {
+  margin-left: $margin-outer;
+  margin-right: $margin-outer;
+  padding-left: $padding-outer;
+  padding-right: $padding-outer;
+}
+
+.btn-normal {
+  @extend .btn;
+  height: $btn-height;
+  text-align: center;
+}
+
+a.btn-normal, a.btn-large {
+  vertical-align: middle;
+  display: table-cell;
+}
+
+button {
+  @extend .btn-normal;
+}
+
+.btn-success {
+  font-weight: bold;
+}
+
+.btn-success:disabled {
+  background: buttonface !important;
+  color: black;
+}
+
+.btn-large {
+  @extend .btn-normal, .btn-lg;
+  width: $btn-width-large;
+  white-space: normal;
+  border-bottom-left-radius: 44px;
+  border-bottom-right-radius: 44px;
+  border-top-left-radius: 44px;
+  border-top-right-radius: 44px;
+  border-width: 0px;
+}
+
+.btn-text-icon {
+  width: 300px;
+  text-align: left !important;
+}
+
+.btn-large i {
+  vertical-align: middle;
+}
+
+.btn-nav {
+  @extend .btn-large;
+  width: 80px;
+}
+
+.btn-list-element {
+  @extend .btn, .btn-lg;
+  background: #A1A8B0;
+  color: white !important;
+  height: $btn-list-height;
+  margin-bottom: 11px;
+  font-size: $font-size-base + 1px;
+  font-weight: bold;
+  width: $btn-list-width;
+  text-align: left;
+  white-space: normal;
+}
+
+.btn-list-element-search {
+  @extend .btn-list-element;
+  width: $btn-list-width-search;
+}
+
+.btn-list-element-selected {
+  background: $brand-primary !important;
+  color: white !important;
+}
+
+.radio-list {
+  padding-left: 5px;
+}
+
+.log-off-img {
+  color: $brand-primary;
+}
